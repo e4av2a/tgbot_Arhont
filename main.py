@@ -17,7 +17,8 @@ def start_dialog(message):
     btn4 = types.InlineKeyboardButton("А где вас найти?", callback_data="search")
     btn5 = types.InlineKeyboardButton("Собрания и прочее...", callback_data="other")
 
-    markup.add(btn1, btn2, btn3)
+    markup.add(btn1, btn2)
+    markup.add(btn3)
     markup.add(btn4)
     markup.add(btn5)
 
