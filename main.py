@@ -4,9 +4,11 @@ from telebot import types
 BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
 bot = telebot.TeleBot(BOT_TOKEN)
 
+url_anketa = "https://vk.com/sao_arhont?from=search" # нужно исправить на активную ссылку на анкету
 
 # что хотелось бы ещё:
 # все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
+
 
 @bot.message_handler(commands=['start', 'restart'])
 def start_dialog(message):
@@ -17,7 +19,7 @@ def start_dialog(message):
     btn1 = types.KeyboardButton("Кто вы?")
     btn2 = types.KeyboardButton("Вайб?")
     btn3 = types.KeyboardButton("А чё копаете??")
-    btn4 = types.KeyboardButton("А где вас найти?")
+    btn4 = types.KeyboardButton("А как к вам попасть?")
     btn5 = types.KeyboardButton("Собрания и прочее...")
     markup.add(btn1, btn2, btn3, btn4, btn5)
 
@@ -90,11 +92,11 @@ def dig_message(message):
 
 
 # Ссылки
-@bot.message_handler(func=lambda message: message.text == "А где вас найти?")
+@bot.message_handler(func=lambda message: message.text == "А как к вам попасть?")
 def search_message(message):
     chat_id = message.chat.id
 
-    text = "Вот ссылочки: "
+    text = "Вот ссылочки, где будут актуальные новости: "
 
     markup_inline = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton("наш тг", url="https://t.me/CAO_arhont")
@@ -105,6 +107,19 @@ def search_message(message):
         chat_id,
         text,
         reply_markup=markup_inline,
+        parse_mode='Markdown'
+    )
+
+    text2 = "А ещё заполняй анкету кандидата и с тобой обязательно свяжутся!"
+
+    markup_inline2 = types.InlineKeyboardMarkup()
+    btn3 = types.InlineKeyboardButton("анкета кандидата", url=url_anketa)
+    markup_inline2.add(btn3)
+
+    bot.send_message(
+        chat_id,
+        text2,
+        reply_markup=markup_inline2,
         parse_mode='Markdown'
     )
 
