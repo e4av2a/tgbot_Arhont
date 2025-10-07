@@ -48,16 +48,7 @@ def who_we_are(message):
                                   "[группе в вк](https://vk.com/sao_arhont)!",
                          parse_mode='Markdown')
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Назад")
-    markup.add(btn1)
-
-    bot.send_message(
-        chat_id,
-        "Жми кнопки ниже, чтобы узнать больше...",
-        reply_markup=markup,
-        parse_mode='Markdown'
-    )
+    back_message(chat_id)
 
 
 # Вайб
@@ -65,16 +56,26 @@ def who_we_are(message):
 def vibe_message(message):
     chat_id = message.chat.id
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Назад")
-    markup.add(btn1)
+    text = "Каждый отряд имеет свой неповторимый вайб. " \
+           "Его ты сможешь ощутить, поехав с нами на сезон, " \
+           "но мы попробуем передать через фотографии, музыку и видео."
+
+    markup_inline = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton("фотографии 📸", url="https://vk.com/album-47403562_304419511")
+    btn2 = types.InlineKeyboardButton("музыка 🎧", url="https://vk.com/audios-47403562?z=audio_playlist-47403562_1")
+    btn3 = types.InlineKeyboardButton("видео 🎞",
+                                      url="https://vk.com/sao_arhont?z=video-47403562_456239114%2Fvideos-47403562%2Fpl_-47403562_-2")
+    markup_inline.add(btn1)
+    markup_inline.add(btn2, btn3)
 
     bot.send_message(
         chat_id,
-        "Жми кнопки ниже, чтобы узнать больше...",
-        reply_markup=markup,
+        text,
+        reply_markup=markup_inline,
         parse_mode='Markdown'
     )
+
+    back_message(chat_id)
 
 
 # Чокопайки
@@ -82,16 +83,7 @@ def vibe_message(message):
 def dig_message(message):
     chat_id = message.chat.id
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Назад")
-    markup.add(btn1)
-
-    bot.send_message(
-        chat_id,
-        "Жми кнопки ниже, чтобы узнать больше...",
-        reply_markup=markup,
-        parse_mode='Markdown'
-    )
+    back_message(chat_id, komissar=True)
 
 
 # Ссылки
@@ -99,20 +91,21 @@ def dig_message(message):
 def search_message(message):
     chat_id = message.chat.id
 
-    text = "Вот наш тг: [ссылочка](https://t.me/CAO_arhont) \n" \
-           "Вот наш вк: [ссылочка](https://vk.com/sao_arhont)"
+    text = "Вот ссылочки: "
 
-    # здесь можно перейти на инлайн-кнопки
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Назад")
-    markup.add(btn1)
+    markup_inline = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton("наш тг", url="https://t.me/CAO_arhont")
+    btn2 = types.InlineKeyboardButton("наш вк", url="https://vk.com/sao_arhont")
+    markup_inline.add(btn1, btn2)
 
     bot.send_message(
         chat_id,
         text,
-        reply_markup=markup,
+        reply_markup=markup_inline,
         parse_mode='Markdown'
     )
+
+    back_message(chat_id, "Подписывайтесь на нас!", True)
 
 
 # Комиссар
@@ -124,16 +117,7 @@ def more_message(message):
            "В Архонте это наш любимый [Дамир](https://vk.com/the.guydie) 😘 \n\n" \
            "Напишу ему, он обязательно ответит!"
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Назад")
-    markup.add(btn1)
-
-    bot.send_message(
-        chat_id,
-        text,
-        reply_markup=markup,
-        parse_mode='Markdown'
-    )
+    back_message(chat_id, text)
 
 
 @bot.message_handler(func=lambda message: message.text == "Назад")
@@ -151,6 +135,22 @@ def handle_other_messages(message):
         chat_id,
         "А кнопки для кого делали, нужно жмакать на них. \n"
         "Или для разнообразия напиши /start "
+    )
+
+
+def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
+    if komissar:
+        btn2 = types.KeyboardButton("Я хочу узнать больше!")
+        markup.add(btn2)
+
+    bot.send_message(
+        chat_id,
+        mes,
+        reply_markup=markup,
+        parse_mode='Markdown'
     )
 
 
