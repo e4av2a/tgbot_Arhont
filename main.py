@@ -5,6 +5,9 @@ BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
 bot = telebot.TeleBot(BOT_TOKEN)
 
 
+# что хотелось бы ещё:
+# все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
+
 @bot.message_handler(commands=['start', 'restart'])
 def start_dialog(message):
     chat_id = message.chat.id
@@ -138,6 +141,8 @@ def handle_other_messages(message):
     )
 
 
+# mes - сообщение перед сменой меню на кнопку "Назад"
+# komissar - нужно ли выводить информацию про комиссара, по умолчанию False
 def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("Назад")
