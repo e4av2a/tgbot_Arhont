@@ -9,153 +9,137 @@ bot = telebot.TeleBot(BOT_TOKEN)
 def start_dialog(message):
     chat_id = message.chat.id
 
-    # Первый вопрос
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton("Кто вы?", callback_data="who")
-    btn2 = types.InlineKeyboardButton("Вайб?", callback_data="vibe")
-    btn3 = types.InlineKeyboardButton("А чё копаете??", callback_data="dig")
-    btn4 = types.InlineKeyboardButton("А где вас найти?", callback_data="search")
-    btn5 = types.InlineKeyboardButton("Собрания и прочее...", callback_data="other")
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 
-    markup.add(btn1, btn2)
-    markup.add(btn3)
-    markup.add(btn4)
-    markup.add(btn5)
+    btn1 = types.KeyboardButton("Кто вы?")
+    btn2 = types.KeyboardButton("Вайб?")
+    btn3 = types.KeyboardButton("А чё копаете??")
+    btn4 = types.KeyboardButton("А где вас найти?")
+    btn5 = types.KeyboardButton("Собрания и прочее...")
+    markup.add(btn1, btn2, btn3, btn4, btn5)
+
+    welcome_text = (
+        "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
+        "Можешь выбрать вопрос..."
+    )
+
+    bot.send_message(chat_id, welcome_text, reply_markup=markup)
+
+
+@bot.message_handler(func=lambda message: message.text == "Кто вы?")
+def who_we_are(message):
+    chat_id = message.chat.id
+
+    # bot.answer_callback_query(chat_id, "Кто мы?")
+    about_us = "Мы первый студенческий археологический отряд в России, " \
+               "а каждое лето проводим в экспедициях, путешествуя по всей стране и даже за границей!\n\n" \
+               "Выезжаем мы обычно в конце июля, а возвращаемся только к началу учёбы. " \
+               "Архонт - это не только про археологию, незабываемое лето, " \
+               "но и про самых близких и верных друзей.\n\n"
+
+    bot.send_message(chat_id, about_us)
+
+    try:
+        # Отправка фото из файла
+        with open('images/who.jpg', 'rb') as photo:
+            bot.send_photo(chat_id, photo)
+    except FileNotFoundError:
+        bot.send_message(chat_id, "Тут могло быть красивое фото... Но посмотри пока сам в "
+                                  "[группе в вк](https://vk.com/sao_arhont)!",
+                         parse_mode='Markdown')
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
 
     bot.send_message(
         chat_id,
-        "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
-        "Можешь выбрать вопрос...",
+        "Жми кнопки ниже, чтобы узнать больше...",
         reply_markup=markup,
         parse_mode='Markdown'
     )
 
 
-@bot.callback_query_handler(func=lambda call: call.data in ["who", "vibe", "dig", "search", "other", "question"])
-def who_we_are(call):
-    chat_id = call.message.chat.id
+# Вайб
+@bot.message_handler(func=lambda message: message.text == "Вайб?")
+def vibe_message(message):
+    chat_id = message.chat.id
 
-    btn1 = types.InlineKeyboardButton("Кто вы?", callback_data="who")
-    btn2 = types.InlineKeyboardButton("Вайб?", callback_data="vibe")
-    btn3 = types.InlineKeyboardButton("А чё копаете??", callback_data="dig")
-    btn4 = types.InlineKeyboardButton("А где вас найти?", callback_data="search")
-    btn5 = types.InlineKeyboardButton("Собрания и прочее...", callback_data="other")
-    btn6 = types.InlineKeyboardButton("Я хочу задать другие вопросы!", callback_data="question")
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
 
-    # Кто мы?
-    if call.data == "who":
-        bot.answer_callback_query(call.id, "Кто мы?")
-        about_us = "Мы первый студенческий археологический отряд в России, " \
-                   "а каждое лето проводим в экспедициях, путешествуя по всей стране и даже за границей!\n\n" \
-                   "Выезжаем мы обычно в конце июля, а возвращаемся только к началу учёбы. " \
-                   "Архонт - это не только про археологию, незабываемое лето, " \
-                   "но и про самых близких и верных друзей.\n\n"
+    bot.send_message(
+        chat_id,
+        "Жми кнопки ниже, чтобы узнать больше...",
+        reply_markup=markup,
+        parse_mode='Markdown'
+    )
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn2, btn3)
-        markup.add(btn4)
-        markup.add(btn5)
 
-        bot.send_message(chat_id, about_us)
+# Чокопайки
+@bot.message_handler(func=lambda message: message.text == "А чё копаете??")
+def dig_message(message):
+    chat_id = message.chat.id
 
-        try:
-            # Отправка фото из файла
-            with open('images/who.jpg', 'rb') as photo:
-                bot.send_photo(chat_id, photo)
-        except FileNotFoundError:
-            bot.send_message(chat_id, "Тут могло быть красивое фото... Но посмотри пока сам в "
-                                      "[группе в вк](https://vk.com/sao_arhont)!",
-                             parse_mode='Markdown')
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
 
-        bot.send_message(
-            chat_id,
-            "Жми кнопки ниже, чтобы узнать больше...",
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
-    # Чокопайки
-    elif call.data == "dig":
-        bot.answer_callback_query(call.id, "Сейчас расскажем, что копаем, хихихи")
+    bot.send_message(
+        chat_id,
+        "Жми кнопки ниже, чтобы узнать больше...",
+        reply_markup=markup,
+        parse_mode='Markdown'
+    )
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn1, btn2)
-        markup.add(btn4)
-        markup.add(btn5)
 
-        bot.send_message(
-            chat_id,
-            "Жми кнопки ниже, чтобы узнать больше...",
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
-    # Вайб
-    elif call.data == "vibe":
-        bot.answer_callback_query(call.id, "Наш вайб...")
+# Ссылки
+@bot.message_handler(func=lambda message: message.text == "А где вас найти?")
+def search_message(message):
+    chat_id = message.chat.id
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn1, btn3)
-        markup.add(btn4)
-        markup.add(btn5)
+    text = "Вот наш тг: [ссылочка](https://t.me/CAO_arhont) \n" \
+           "Вот наш вк: [ссылочка](https://vk.com/sao_arhont)"
 
-        bot.send_message(
-            chat_id,
-            "Жми кнопки ниже, чтобы узнать больше...",
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
-    # Ссылки
-    elif call.data == "search":
+    # здесь можно перейти на инлайн-кнопки
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
 
-        text = "Вот наш тг: [ссылочка](https://t.me/CAO_arhont) \n" \
-               "Вот наш вк: [ссылочка](https://vk.com/sao_arhont)"
+    bot.send_message(
+        chat_id,
+        text,
+        reply_markup=markup,
+        parse_mode='Markdown'
+    )
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn1, btn2, btn3)
-        markup.add(btn5)
-        markup.add(btn6)
 
-        bot.send_message(
-            chat_id,
-            text,
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
-    # Собрания
-    elif call.data == "other":
-        bot.answer_callback_query(call.id, "Так приятно, что Вы хотите узнать больше!")
+# Комиссар
+@bot.message_handler(func=lambda message: message.text == "Я хочу узнать больше!")
+def more_message(message):
+    chat_id = message.chat.id
 
-        text = "пу пу пу кнопка ещё не прописана"
+    text = "В отрядах есть такой общительный и весёлый человек - **комиссар**. " \
+           "В Архонте это наш любимый [Дамир](https://vk.com/the.guydie) 😘 \n\n" \
+           "Напишу ему, он обязательно ответит!"
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn1, btn2, btn3)
-        markup.add(btn4)
-        markup.add(btn6)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Назад")
+    markup.add(btn1)
 
-        bot.send_message(
-            chat_id,
-            text,
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
-    # Комиссар
-    elif call.data == "question":
-        bot.answer_callback_query(call.id, "Так приятно, что Вы хотите узнать больше!")
+    bot.send_message(
+        chat_id,
+        text,
+        reply_markup=markup,
+        parse_mode='Markdown'
+    )
 
-        text = "В отрядах есть такой общительный и весёлый человек - **комиссар**. " \
-               "В Архонте это наш любимый [Дамир](https://vk.com/the.guydie) 😘 \n\n" \
-               "Напишу ему, он обязательно ответит!"
 
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn1, btn2, btn3)
-        markup.add(btn4)
-        markup.add(btn5)
-
-        bot.send_message(
-            chat_id,
-            text,
-            reply_markup=markup,
-            parse_mode='Markdown'
-        )
+@bot.message_handler(func=lambda message: message.text == "Назад")
+def back_to_main(message):
+    # Возвращаемся к главному меню
+    start_dialog(message)
 
 
 # Обработка любых других сообщений
