@@ -1,10 +1,13 @@
 import telebot
 from telebot import types
+from json_handler import ExpeditionsData
 
 BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
 bot = telebot.TeleBot(BOT_TOKEN)
 
-url_anketa = "https://vk.com/sao_arhont?from=search" # нужно исправить на активную ссылку на анкету
+url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58" # нужно исправить на активную ссылку на анкету
+
+expeditions_data = ExpeditionsData('history.json')
 
 # что хотелось бы ещё:
 # все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
@@ -84,11 +87,47 @@ def vibe_message(message):
 
 
 # Чокопайки
-@bot.message_handler(func=lambda message: message.text == "А чё копаете??")
+@bot.message_handler(func=lambda message: message.text in ["А чё копаете??", "А чё ещё копаете?"])
 def dig_message(message):
     chat_id = message.chat.id
 
-    back_message(chat_id, komissar=True)
+    markup_inline = types.InlineKeyboardMarkup()
+    btn_2017 = types.InlineKeyboardButton("2017 г.", callback_data="2017")
+    btn_2018 = types.InlineKeyboardButton("2018 г.", callback_data="2018")
+
+    markup_inline.add(btn_2017, btn_2018)
+
+    bot.send_message(
+        chat_id,
+        "У Архонта было много экспедиций, можешь узнать про любую из них:",
+        reply_markup=markup_inline,
+        parse_mode='Markdown'
+    )
+
+    back_message(chat_id, mes="Можешь, конечно, назад вернуться", komissar=True)
+
+
+# Информация об экспедиции за год
+@bot.callback_query_handler(func=lambda call: call.data in ["2017", "2018"])
+def year_of_expedition(call):
+    chat_id = call.message.chat.id
+
+    bot.send_message(
+        chat_id,
+        expeditions_data.get_expedition_info(int(call.data)),
+        parse_mode='Markdown'
+    )
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("А чё ещё копаете?")
+    markup.add(btn1)
+
+    bot.send_message(
+        chat_id,
+        "Хочешь узнать больше?",
+        reply_markup=markup,
+        parse_mode='Markdown'
+    )
 
 
 # Ссылки
