@@ -2,10 +2,11 @@ import telebot
 from telebot import types
 from json_handler import ExpeditionsData
 
-BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
+BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
 
-url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58" # нужно исправить на активную ссылку на анкету
+# ссылка на анкету кандидата
+url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58"
 
 expeditions_data = ExpeditionsData('history.json')
 
