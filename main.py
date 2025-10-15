@@ -2,13 +2,14 @@ import telebot
 from telebot import types
 from json_handler import ExpeditionsData
 
-BOT_TOKEN = ""
+BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ссылка на анкету кандидата
 url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58"
 
 expeditions_data = ExpeditionsData('history.json')
+years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.", "2019 г.", "2020 г.", "2021 г.", "2022 г.", "2023 г.", "2024 г.", "2025 г."]
 
 # что хотелось бы ещё:
 # все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
@@ -92,30 +93,23 @@ def vibe_message(message):
 def dig_message(message):
     chat_id = message.chat.id
 
-    markup_inline = types.InlineKeyboardMarkup()
-    btn_2017 = types.InlineKeyboardButton("2017 г.", callback_data="2017")
-    btn_2018 = types.InlineKeyboardButton("2018 г.", callback_data="2018")
-
-    markup_inline.add(btn_2017, btn_2018)
-
     bot.send_message(
         chat_id,
-        "У Архонта было много экспедиций, можешь узнать про любую из них:",
-        reply_markup=markup_inline,
+        "У Архонта было много экспедиций, можешь узнать про любую из них",
         parse_mode='Markdown'
     )
 
-    back_message(chat_id, mes="Можешь, конечно, назад вернуться", komissar=True)
+    back_message(chat_id, mes="Можешь, конечно, назад вернуться", komissar=True, other_btn=years)
 
 
 # Информация об экспедиции за год
-@bot.callback_query_handler(func=lambda call: call.data in ["2017", "2018"])
-def year_of_expedition(call):
-    chat_id = call.message.chat.id
+@bot.message_handler(func=lambda message: message.text in years)
+def year_of_expedition(message):
+    chat_id = message.chat.id
 
     bot.send_message(
         chat_id,
-        expeditions_data.get_expedition_info(int(call.data)),
+        expeditions_data.get_expedition_info(int(message.text[:4])),
         parse_mode='Markdown'
     )
 
@@ -198,8 +192,13 @@ def handle_other_messages(message):
 
 # mes - сообщение перед сменой меню на кнопку "Назад"
 # komissar - нужно ли выводить информацию про комиссара, по умолчанию False
-def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False):
+# other_btn - добавление других кнопок в меню - формат list
+def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False, other_btn=None):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if other_btn is not None:
+        for b in other_btn:
+            markup.add(types.KeyboardButton(b))
+
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
     if komissar:
