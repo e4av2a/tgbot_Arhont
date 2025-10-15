@@ -93,13 +93,9 @@ def vibe_message(message):
 def dig_message(message):
     chat_id = message.chat.id
 
-    bot.send_message(
-        chat_id,
-        "У Архонта было много экспедиций, можешь узнать про любую из них",
-        parse_mode='Markdown'
-    )
+    text = "У Архонта было много экспедиций, можешь узнать про любую из них"
 
-    back_message(chat_id, mes="Можешь, конечно, назад вернуться", komissar=True, other_btn=years)
+    back_message(chat_id, mes=text, komissar=True, other_btn=years)
 
 
 # Информация об экспедиции за год
@@ -107,9 +103,10 @@ def dig_message(message):
 def year_of_expedition(message):
     chat_id = message.chat.id
 
+    year = int(message.text[:4])
     bot.send_message(
         chat_id,
-        expeditions_data.get_expedition_info(int(message.text[:4])),
+        expeditions_data.get_expedition_info(year),
         parse_mode='Markdown'
     )
 
@@ -196,8 +193,17 @@ def handle_other_messages(message):
 def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False, other_btn=None):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if other_btn is not None:
-        for b in other_btn:
-            markup.add(types.KeyboardButton(b))
+        n = len(other_btn)
+        for i in range(0, n - 3, 3):
+            btn1 = types.KeyboardButton(other_btn[i])
+            btn2 = types.KeyboardButton(other_btn[i + 1])
+            btn3 = types.KeyboardButton(other_btn[i + 2])
+            markup.add(btn1, btn2, btn3)
+        if n % 3 == 1:
+            markup.add(types.KeyboardButton(other_btn[n - 1]))
+        if n % 3 == 2:
+            markup.add(types.KeyboardButton(other_btn[n - 2], other_btn[n - 1]))
+
 
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
