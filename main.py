@@ -1,6 +1,18 @@
 import telebot
 from telebot import types
 from json_handler import ExpeditionsData
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler('simple_bot.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+users_log = set()
 
 BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -17,12 +29,20 @@ years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.",
 
 @bot.message_handler(commands=['start', 'restart'])
 def start_dialog(message):
+    user = message.from_user
+    user_info = f"{user.id} (@{user.username}) {user.first_name} {user.last_name}"
+
+    if user.id not in users_log:
+        users_log.add(user.id)
+        logging.info(f"НОВЫЙ ПОЛЬЗОВАТЕЛЬ: {user_info}")
+        logging.info(f"Всего пользователей: {len(users_log)}")
+
     chat_id = message.chat.id
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 
     btn1 = types.KeyboardButton("Кто вы?")
-    btn2 = types.KeyboardButton("Вайб?")
+    btn2 = types.KeyboardButton("Какие вы?")
     btn3 = types.KeyboardButton("А чё копаете??")
     btn4 = types.KeyboardButton("А как к вам попасть?")
     btn5 = types.KeyboardButton("Собрания и прочее...")
@@ -34,6 +54,7 @@ def start_dialog(message):
     )
 
     bot.send_message(chat_id, welcome_text, reply_markup=markup)
+    logging.info(f"Команда /start от: {user_info}")
 
 
 @bot.message_handler(func=lambda message: message.text == "Кто вы?")
@@ -220,5 +241,5 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
 
 
 if __name__ == "__main__":
-    print("Бот запущен...")
+    logging.info("=== Бот запущен ===")
     bot.infinity_polling()
