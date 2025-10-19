@@ -8,7 +8,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(message)s',
     handlers=[
-        logging.FileHandler('simple_bot.log', encoding='utf-8'),
+        logging.FileHandler('arhont_bot.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -83,7 +83,7 @@ def who_we_are(message):
 
 
 # Вайб
-@bot.message_handler(func=lambda message: message.text == "Вайб?")
+@bot.message_handler(func=lambda message: message.text == "Какие вы?")
 def vibe_message(message):
     chat_id = message.chat.id
 
@@ -128,7 +128,7 @@ def year_of_expedition(message):
     bot.send_message(
         chat_id,
         expeditions_data.get_expedition_info(year),
-        parse_mode='Markdown'
+        parse_mode='HTML'
     )
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)

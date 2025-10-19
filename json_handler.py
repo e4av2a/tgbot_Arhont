@@ -39,7 +39,7 @@ class ExpeditionsData:
         expedition_info = self.get_by_year(year)
         if expedition_info:
             return f"\n=== Экспедиция за {year} год ===\n\n" \
-                   f"Город: {expedition_info['place']}\n\n" \
+                   f"Место: {expedition_info['place']}\n\n" \
                    f"{expedition_info['description']}"
         else:
             return f"Информация за {year} не найдена"
