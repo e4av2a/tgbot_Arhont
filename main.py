@@ -1,3 +1,5 @@
+import random
+
 import telebot
 from telebot import types
 
@@ -15,9 +17,8 @@ logging.basicConfig(
 )
 
 users_log = load_users()
-print(users_log)
 
-BOT_TOKEN = ""
+BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ссылка на анкету кандидата
@@ -96,15 +97,26 @@ def who_we_are(message):
 def vibe_message(message):
     chat_id = message.chat.id
 
+    random_n = random.randint(0, 43)
+    try:
+        # Отправка фото из файла
+        with open(f'images/вайб/Вайб_{random_n}.jpg', 'rb') as photo:
+            bot.send_photo(chat_id, photo,
+                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗")
+    except FileNotFoundError:
+        logging.info(f"Рандомная фотография {random_n} не нашлась")
+
     text = "Каждый отряд имеет свой неповторимый дух. " \
            "Его ты сможешь ощутить, поехав с нами на сезон, " \
            "но мы попробуем передать через фотографии, музыку и видео."
 
     markup_inline = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton("фотографии 📸", url="https://vk.com/album-47403562_304419511")
-    btn2 = types.InlineKeyboardButton("музыка 🎧", url="https://vk.com/audios-47403562?z=audio_playlist-47403562_1")
+    btn1 = types.InlineKeyboardButton("фотографии 📸",
+                                      url="https://drive.google.com/drive/folders/1USTWWbUK9HZWwxBdQ4AMMCWa6mREYnS6?dmr=1&ec=wgc-drive-globalnav-goto")
+    btn2 = types.InlineKeyboardButton("музыка 🎧",
+                                      url="https://vk.com/audios-47403562?z=audio_playlist-47403562_1")
     btn3 = types.InlineKeyboardButton("видео 🎞",
-                                      url="https://vk.com/sao_arhont?z=video-47403562_456239114%2Fvideos-47403562%2Fpl_-47403562_-2")
+                                      url="https://vk.com/sao_arhont?z=video-47403562_456239125%2Fvideos-47403562%2Fpl_-47403562_-2")
     markup_inline.add(btn1)
     markup_inline.add(btn2, btn3)
 
@@ -188,7 +200,7 @@ def search_message(message):
         parse_mode='Markdown'
     )
 
-    back_message(chat_id, "Подписывайтесь на нас!", True)
+    back_message(chat_id, "Подписывайтесь на нас!", True, other_btn=["Собрания и прочее..."])
 
 
 # Комиссар
@@ -201,6 +213,19 @@ def more_message(message):
            "Напишу ему, он обязательно ответит!"
 
     back_message(chat_id, text)
+
+
+# Собрания
+@bot.message_handler(func=lambda message: message.text == "Собрания и прочее...")
+def meeting_message(message):
+    chat_id = message.chat.id
+
+    text = "Мы не только в телеграме и вк, а очень ждём именно тебя на нашем первом собрании," \
+           "которое состоится:\n\n" \
+           "📍Когда? 8 октября (вторник)\n📍Во сколько?: 18:30я \n📍Где? НИК, 2.03\n\n" \
+           "Больше подробностей в [группе вк](https://vk.com/sao_arhont)."
+
+    back_message(chat_id, text, komissar=True)
 
 
 @bot.message_handler(func=lambda message: message.text == "Назад")
