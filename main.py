@@ -1,6 +1,22 @@
+import random
+
 import telebot
 from telebot import types
+
 from json_handler import ExpeditionsData
+import logging
+from users_handler import load_users, add_user_in_file
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler('arhont_bot.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
+users_log = load_users()
 
 BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -17,23 +33,41 @@ years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.",
 
 @bot.message_handler(commands=['start', 'restart'])
 def start_dialog(message):
+    user = message.from_user
+    user_info = f"{user.id} (@{user.username}) {user.first_name} {user.last_name}"
+
+    welcome_text = ""
+
+    if str(user.id) not in users_log:
+        add_user_in_file(user.id)
+        users_log.add(str(user.id))
+        logging.info(f"НОВЫЙ ПОЛЬЗОВАТЕЛЬ: {user_info}")
+        logging.info(f"Всего пользователей: {len(users_log)}")
+        welcome_text = "Архонт приветствует тебя! 🥰\n\nЕсли ты любишь природу, сон в палатке и завтраки на свежем " \
+                       "воздухе — тебе точно к нам! Нам интересно открывать новое, путешествовать в неизведанные " \
+                       "места!\n\nХочешь узнать, где мы уже побывали и, что раскопали? — Задавай вопросы, с радостью " \
+                       "на всё ответим! "
+        # отправка сообщения Дамиру о новом пользователе
+        bot.send_message(1275982334, f"Дамир, приффки, сейчас в бота уже зашли пользователей: {len(users_log)}")
+    else:
+        welcome_text = (
+            "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
+            "Можешь выбрать вопрос..."
+        )
+
     chat_id = message.chat.id
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 
     btn1 = types.KeyboardButton("Кто вы?")
-    btn2 = types.KeyboardButton("Вайб?")
+    btn2 = types.KeyboardButton("Какие вы?")
     btn3 = types.KeyboardButton("А чё копаете??")
     btn4 = types.KeyboardButton("А как к вам попасть?")
     btn5 = types.KeyboardButton("Собрания и прочее...")
     markup.add(btn1, btn2, btn3, btn4, btn5)
 
-    welcome_text = (
-        "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
-        "Можешь выбрать вопрос..."
-    )
-
     bot.send_message(chat_id, welcome_text, reply_markup=markup)
+    logging.info(f"Команда /start от: {user_info}")
 
 
 @bot.message_handler(func=lambda message: message.text == "Кто вы?")
@@ -45,36 +79,46 @@ def who_we_are(message):
                "а каждое лето проводим в экспедициях, путешествуя по всей стране и даже за границей!\n\n" \
                "Выезжаем мы обычно в конце июля, а возвращаемся только к началу учёбы. " \
                "Архонт - это не только про археологию, незабываемое лето, " \
-               "но и про самых близких и верных друзей.\n\n"
+               "но и про самых близких и верных друзей."
 
-    bot.send_message(chat_id, about_us)
+    # bot.send_message(chat_id, about_us)
 
     try:
         # Отправка фото из файла
         with open('images/who.jpg', 'rb') as photo:
-            bot.send_photo(chat_id, photo)
+            bot.send_photo(chat_id, photo, caption=about_us)
     except FileNotFoundError:
-        bot.send_message(chat_id, "Тут могло быть красивое фото... Но посмотри пока сам в "
-                                  "[группе в вк](https://vk.com/sao_arhont)!",
+        bot.send_message(chat_id, about_us,
                          parse_mode='Markdown')
 
     back_message(chat_id)
 
 
 # Вайб
-@bot.message_handler(func=lambda message: message.text == "Вайб?")
+@bot.message_handler(func=lambda message: message.text == "Какие вы?")
 def vibe_message(message):
     chat_id = message.chat.id
 
-    text = "Каждый отряд имеет свой неповторимый вайб. " \
+    random_n = random.randint(0, 43)
+    try:
+        # Отправка фото из файла
+        with open(f'images/вайб/Вайб_{random_n}.jpg', 'rb') as photo:
+            bot.send_photo(chat_id, photo,
+                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗")
+    except FileNotFoundError:
+        logging.info(f"Рандомная фотография {random_n} не нашлась")
+
+    text = "Каждый отряд имеет свой неповторимый дух. " \
            "Его ты сможешь ощутить, поехав с нами на сезон, " \
            "но мы попробуем передать через фотографии, музыку и видео."
 
     markup_inline = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton("фотографии 📸", url="https://vk.com/album-47403562_304419511")
-    btn2 = types.InlineKeyboardButton("музыка 🎧", url="https://vk.com/audios-47403562?z=audio_playlist-47403562_1")
+    btn1 = types.InlineKeyboardButton("фотографии 📸",
+                                      url="https://drive.google.com/drive/folders/1USTWWbUK9HZWwxBdQ4AMMCWa6mREYnS6?dmr=1&ec=wgc-drive-globalnav-goto")
+    btn2 = types.InlineKeyboardButton("музыка 🎧",
+                                      url="https://vk.com/audios-47403562?z=audio_playlist-47403562_1")
     btn3 = types.InlineKeyboardButton("видео 🎞",
-                                      url="https://vk.com/sao_arhont?z=video-47403562_456239114%2Fvideos-47403562%2Fpl_-47403562_-2")
+                                      url="https://vk.com/sao_arhont?z=video-47403562_456239125%2Fvideos-47403562%2Fpl_-47403562_-2")
     markup_inline.add(btn1)
     markup_inline.add(btn2, btn3)
 
@@ -93,13 +137,9 @@ def vibe_message(message):
 def dig_message(message):
     chat_id = message.chat.id
 
-    bot.send_message(
-        chat_id,
-        "У Архонта было много экспедиций, можешь узнать про любую из них",
-        parse_mode='Markdown'
-    )
+    text = "У Архонта было много экспедиций, можешь узнать про любую из них"
 
-    back_message(chat_id, mes="Можешь, конечно, назад вернуться", komissar=True, other_btn=years)
+    back_message(chat_id, mes=text, komissar=True, other_btn=years)
 
 
 # Информация об экспедиции за год
@@ -107,11 +147,16 @@ def dig_message(message):
 def year_of_expedition(message):
     chat_id = message.chat.id
 
+    year = int(message.text[:4])
     bot.send_message(
         chat_id,
-        expeditions_data.get_expedition_info(int(message.text[:4])),
-        parse_mode='Markdown'
+        expeditions_data.get_expedition_info(year),
+        parse_mode='HTML'
     )
+
+    media = expeditions_data.get_media_album(year)
+    if media is not None:
+        bot.send_media_group(chat_id, media)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("А чё ещё копаете?")
@@ -157,7 +202,7 @@ def search_message(message):
         parse_mode='Markdown'
     )
 
-    back_message(chat_id, "Подписывайтесь на нас!", True)
+    back_message(chat_id, "Подписывайтесь на нас!", True, other_btn=["Собрания и прочее..."])
 
 
 # Комиссар
@@ -170,6 +215,19 @@ def more_message(message):
            "Напишу ему, он обязательно ответит!"
 
     back_message(chat_id, text)
+
+
+# Собрания
+@bot.message_handler(func=lambda message: message.text == "Собрания и прочее...")
+def meeting_message(message):
+    chat_id = message.chat.id
+
+    text = "Мы не только в телеграме и вк, а очень ждём именно тебя на нашем первом собрании," \
+           "которое состоится:\n\n" \
+           "📍Когда? 8 октября (вторник)\n📍Во сколько?: 18:30я \n📍Где? НИК, 2.03\n\n" \
+           "Больше подробностей в [группе вк](https://vk.com/sao_arhont)."
+
+    back_message(chat_id, text, komissar=True)
 
 
 @bot.message_handler(func=lambda message: message.text == "Назад")
@@ -196,8 +254,17 @@ def handle_other_messages(message):
 def back_message(chat_id, mes="Жми кнопку ниже, чтобы узнать больше...", komissar=False, other_btn=None):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if other_btn is not None:
-        for b in other_btn:
-            markup.add(types.KeyboardButton(b))
+        n = len(other_btn)
+        for i in range(0, n - 3, 3):
+            btn1 = types.KeyboardButton(other_btn[i])
+            btn2 = types.KeyboardButton(other_btn[i + 1])
+            btn3 = types.KeyboardButton(other_btn[i + 2])
+            markup.add(btn1, btn2, btn3)
+        if n % 3 == 1:
+            markup.add(types.KeyboardButton(other_btn[n - 1]))
+        if n % 3 == 2:
+            markup.add(types.KeyboardButton(other_btn[n - 2], other_btn[n - 1]))
+
 
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
@@ -214,5 +281,5 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
 
 
 if __name__ == "__main__":
-    print("Бот запущен...")
+    logging.info("=== Бот запущен ===")
     bot.infinity_polling()
