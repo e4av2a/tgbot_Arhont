@@ -1,5 +1,7 @@
 import json
 
+from telebot.types import InputMediaPhoto
+
 with open('history.json', encoding='utf-8') as f:
     templates = json.load(f)
 
@@ -31,7 +33,7 @@ class ExpeditionsData:
             for travel in self.data['expeditions']:
                 if travel['year'] == year:
                     return travel
-        print(f"Путешествие за {year} год не найдено")
+        print(f"Экспедиция за {year} год не найдена")
         return None
 
     def get_expedition_info(self, year):
@@ -43,3 +45,23 @@ class ExpeditionsData:
                    f"{expedition_info['description']}"
         else:
             return f"Информация за {year} не найдена"
+
+    def get_expedition_photo(self, year):
+        """Вывод списка фотографий"""
+        expedition_info = self.get_by_year(year)
+        n_photo = expedition_info['photo']
+        list_photo = []
+        if n_photo:
+            for i in range(n_photo):
+                list_photo.append(f'images/{year}/{year}_{i}.jpg')
+        return list_photo
+
+    def get_media_album(self, year):
+        list_photo = self.get_expedition_photo(year)
+        if len(list_photo) == 0:
+            return None
+        try:
+            media = [InputMediaPhoto(open(photo, 'rb')) for photo in list_photo]
+            return media
+        except Exception as e:
+            return None

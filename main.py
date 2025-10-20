@@ -1,8 +1,9 @@
 import telebot
 from telebot import types
+
 from json_handler import ExpeditionsData
 import logging
-from datetime import datetime
+from users_handler import load_users, add_user_in_file
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,7 +13,9 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-users_log = set()
+
+users_log = load_users()
+print(users_log)
 
 BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -32,10 +35,22 @@ def start_dialog(message):
     user = message.from_user
     user_info = f"{user.id} (@{user.username}) {user.first_name} {user.last_name}"
 
-    if user.id not in users_log:
-        users_log.add(user.id)
+    welcome_text = ""
+
+    if str(user.id) not in users_log:
+        add_user_in_file(user.id)
+        users_log.add(str(user.id))
         logging.info(f"НОВЫЙ ПОЛЬЗОВАТЕЛЬ: {user_info}")
         logging.info(f"Всего пользователей: {len(users_log)}")
+        welcome_text = "Архонт приветствует тебя! 🥰\n\nЕсли ты любишь природу, сон в палатке и завтраки на свежем " \
+                       "воздухе — тебе точно к нам! Нам интересно открывать новое, путешествовать в неизведанные " \
+                       "места!\n\nХочешь узнать, где мы уже побывали и, что раскопали? — Задавай вопросы, с радостью " \
+                       "на всё ответим! "
+    else:
+        welcome_text = (
+            "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
+            "Можешь выбрать вопрос..."
+        )
 
     chat_id = message.chat.id
 
@@ -47,11 +62,6 @@ def start_dialog(message):
     btn4 = types.KeyboardButton("А как к вам попасть?")
     btn5 = types.KeyboardButton("Собрания и прочее...")
     markup.add(btn1, btn2, btn3, btn4, btn5)
-
-    welcome_text = (
-        "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
-        "Можешь выбрать вопрос..."
-    )
 
     bot.send_message(chat_id, welcome_text, reply_markup=markup)
     logging.info(f"Команда /start от: {user_info}")
@@ -66,17 +76,16 @@ def who_we_are(message):
                "а каждое лето проводим в экспедициях, путешествуя по всей стране и даже за границей!\n\n" \
                "Выезжаем мы обычно в конце июля, а возвращаемся только к началу учёбы. " \
                "Архонт - это не только про археологию, незабываемое лето, " \
-               "но и про самых близких и верных друзей.\n\n"
+               "но и про самых близких и верных друзей."
 
-    bot.send_message(chat_id, about_us)
+    # bot.send_message(chat_id, about_us)
 
     try:
         # Отправка фото из файла
         with open('images/who.jpg', 'rb') as photo:
-            bot.send_photo(chat_id, photo)
+            bot.send_photo(chat_id, photo, caption=about_us)
     except FileNotFoundError:
-        bot.send_message(chat_id, "Тут могло быть красивое фото... Но посмотри пока сам в "
-                                  "[группе в вк](https://vk.com/sao_arhont)!",
+        bot.send_message(chat_id, about_us,
                          parse_mode='Markdown')
 
     back_message(chat_id)
@@ -87,7 +96,7 @@ def who_we_are(message):
 def vibe_message(message):
     chat_id = message.chat.id
 
-    text = "Каждый отряд имеет свой неповторимый вайб. " \
+    text = "Каждый отряд имеет свой неповторимый дух. " \
            "Его ты сможешь ощутить, поехав с нами на сезон, " \
            "но мы попробуем передать через фотографии, музыку и видео."
 
@@ -130,6 +139,10 @@ def year_of_expedition(message):
         expeditions_data.get_expedition_info(year),
         parse_mode='HTML'
     )
+
+    media = expeditions_data.get_media_album(year)
+    if media is not None:
+        bot.send_media_group(chat_id, media)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("А чё ещё копаете?")
