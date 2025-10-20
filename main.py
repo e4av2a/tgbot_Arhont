@@ -18,7 +18,7 @@ logging.basicConfig(
 
 users_log = load_users()
 
-BOT_TOKEN = "8365312991:AAGxY-g9KSXMxYy8EOB1vo2tVDx064VDZHM"
+BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ссылка на анкету кандидата
