@@ -25,7 +25,11 @@ bot = telebot.TeleBot(BOT_TOKEN)
 url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58"
 
 expeditions_data = ExpeditionsData('history.json')
-years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.", "2019 г.", "2020 г.", "2021 г.", "2022 г.", "2023 г.", "2024 г.", "2025 г."]
+years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.", "2019 г.", "2020 г.", "2021 г.", "2022 г.",
+         "2023 г.", "2024 г.", "2025 г."]
+
+timeout = 60
+
 
 # что хотелось бы ещё:
 # все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
@@ -84,13 +88,17 @@ def who_we_are(message):
 
     # bot.send_message(chat_id, about_us)
 
+    wait_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
+
     try:
         # Отправка фото из файла
         with open('images/who.jpg', 'rb') as photo:
-            bot.send_photo(chat_id, photo, caption=about_us)
+            bot.send_photo(chat_id, photo, caption=about_us, timeout=timeout)
     except FileNotFoundError:
         bot.send_message(chat_id, about_us,
                          parse_mode='Markdown')
+
+    del_mes(chat_id, wait_mes)
 
     back_message(chat_id)
 
@@ -100,14 +108,19 @@ def who_we_are(message):
 def vibe_message(message):
     chat_id = message.chat.id
 
+    wait_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
+
     random_n = random.randint(0, 43)
     try:
         # Отправка фото из файла
         with open(f'images/вайб/Вайб_{random_n}.jpg', 'rb') as photo:
             bot.send_photo(chat_id, photo,
-                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗")
+                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗",
+                           timeout=timeout)
     except FileNotFoundError:
         logging.info(f"Рандомная фотография {random_n} не нашлась")
+
+    del_mes(chat_id, wait_mes)
 
     text = "Каждый отряд имеет свой неповторимый дух. " \
            "Его ты сможешь ощутить, поехав с нами на сезон, " \
@@ -155,9 +168,13 @@ def year_of_expedition(message):
         parse_mode='HTML'
     )
 
+    wait_mes = bot.send_message(chat_id, "Загружаем красивые фото...", parse_mode='Markdown')
+
     media = expeditions_data.get_media_album(year)
     if media is not None:
-        bot.send_media_group(chat_id, media)
+        bot.send_media_group(chat_id, media, timeout=timeout)
+
+    del_mes(chat_id, wait_mes)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("А чё ещё копаете?")
@@ -266,7 +283,6 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
         if n % 3 == 2:
             markup.add(types.KeyboardButton(other_btn[n - 2], other_btn[n - 1]))
 
-
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
     if komissar:
@@ -279,6 +295,13 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
         reply_markup=markup,
         parse_mode='Markdown'
     )
+
+
+def del_mes(chat_id, mes):
+    try:
+        bot.delete_message(chat_id, mes.message_id)
+    except:
+        pass
 
 
 if __name__ == "__main__":
