@@ -86,6 +86,8 @@ def who_we_are(message):
 
     # bot.send_message(chat_id, about_us)
 
+    del_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
+
     try:
         # Отправка фото из файла
         with open('images/who.jpg', 'rb') as photo:
@@ -93,6 +95,8 @@ def who_we_are(message):
     except FileNotFoundError:
         bot.send_message(chat_id, about_us,
                          parse_mode='Markdown')
+
+    bot.delete_message(chat_id, del_mes.message_id)
 
     back_message(chat_id)
 
@@ -102,6 +106,8 @@ def who_we_are(message):
 def vibe_message(message):
     chat_id = message.chat.id
 
+    del_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
+
     random_n = random.randint(0, 43)
     try:
         # Отправка фото из файла
@@ -110,6 +116,8 @@ def vibe_message(message):
                            caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗", timeout=timeout)
     except FileNotFoundError:
         logging.info(f"Рандомная фотография {random_n} не нашлась")
+
+    bot.delete_message(chat_id, del_mes.message_id)
 
     text = "Каждый отряд имеет свой неповторимый дух. " \
            "Его ты сможешь ощутить, поехав с нами на сезон, " \
@@ -157,9 +165,13 @@ def year_of_expedition(message):
         parse_mode='HTML'
     )
 
+    del_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
+
     media = expeditions_data.get_media_album(year)
     if media is not None:
         bot.send_media_group(chat_id, media, timeout=timeout)
+
+    bot.delete_message(chat_id, del_mes.message_id)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("А чё ещё копаете?")
