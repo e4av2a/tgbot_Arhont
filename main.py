@@ -27,6 +27,8 @@ url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58"
 expeditions_data = ExpeditionsData('history.json')
 years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.", "2019 г.", "2020 г.", "2021 г.", "2022 г.", "2023 г.", "2024 г.", "2025 г."]
 
+timeout = 60
+
 # что хотелось бы ещё:
 # все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
 
@@ -87,7 +89,7 @@ def who_we_are(message):
     try:
         # Отправка фото из файла
         with open('images/who.jpg', 'rb') as photo:
-            bot.send_photo(chat_id, photo, caption=about_us)
+            bot.send_photo(chat_id, photo, caption=about_us, timeout=timeout)
     except FileNotFoundError:
         bot.send_message(chat_id, about_us,
                          parse_mode='Markdown')
@@ -105,7 +107,7 @@ def vibe_message(message):
         # Отправка фото из файла
         with open(f'images/вайб/Вайб_{random_n}.jpg', 'rb') as photo:
             bot.send_photo(chat_id, photo,
-                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗")
+                           caption="Вот твоя вайб фотка, которая даст заряд энергии словно чашка кофе! 🤗", timeout=timeout)
     except FileNotFoundError:
         logging.info(f"Рандомная фотография {random_n} не нашлась")
 
@@ -157,7 +159,7 @@ def year_of_expedition(message):
 
     media = expeditions_data.get_media_album(year)
     if media is not None:
-        bot.send_media_group(chat_id, media)
+        bot.send_media_group(chat_id, media, timeout=timeout)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("А чё ещё копаете?")
@@ -265,7 +267,6 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
             markup.add(types.KeyboardButton(other_btn[n - 1]))
         if n % 3 == 2:
             markup.add(types.KeyboardButton(other_btn[n - 2], other_btn[n - 1]))
-
 
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
