@@ -217,6 +217,28 @@ def meeting_message(message):
     chat_id = message.chat.id
 
     text = mes_data.get_mes("meeting_message")
+    add_btn = ["Вахта", "ШАрМ"]
+
+    back_message(chat_id, text, komissar=True, other_btn=add_btn)
+
+
+# Вахта
+@bot.message_handler(func=lambda message: message.text == "Вахта")
+def vahta_message(message):
+    chat_id = message.chat.id
+
+    text = mes_data.get_mes("vahta")
+
+    back_message(chat_id, text, komissar=True)
+
+
+# ШАрМы
+@bot.message_handler(func=lambda message: message.text == "ШАрМ")
+def sharm_message(message):
+    chat_id = message.chat.id
+
+    text = mes_data.get_mes("sharm")
+
     back_message(chat_id, text, komissar=True)
 
 
@@ -253,7 +275,7 @@ def back_message(chat_id, mes="Жми кнопку ниже, чтобы узна
         if n % 3 == 1:
             markup.add(types.KeyboardButton(other_btn[n - 1]))
         if n % 3 == 2:
-            markup.add(types.KeyboardButton(other_btn[n - 2], other_btn[n - 1]))
+            markup.add(types.KeyboardButton(other_btn[n - 2]), types.KeyboardButton(other_btn[n - 1]))
 
     btn1 = types.KeyboardButton("Назад")
     markup.add(btn1)
