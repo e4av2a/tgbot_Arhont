@@ -4,8 +4,9 @@ import telebot
 from telebot import types
 
 from json_handler import ExpeditionsData
+from message import MessageData
 import logging
-from users_handler import load_users, add_user_in_file
+from users_handler import *
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,21 +19,18 @@ logging.basicConfig(
 
 users_log = load_users()
 
-BOT_TOKEN = ""
+print("Введите токен для бота: ")
+BOT_TOKEN = input().strip()
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# ссылка на анкету кандидата
-url_anketa = "https://forms.gle/BoXqMuKwVwyphhn58"
-
+mes_data = MessageData("message.json")
 expeditions_data = ExpeditionsData('history.json')
-years = ["2013 г.", "2014 г.", "2015 г.", "2016 г.", "2017 г.", "2018 г.", "2019 г.", "2020 г.", "2021 г.", "2022 г.",
-         "2023 г.", "2024 г.", "2025 г."]
+
+# ссылка на анкету кандидата
+url_anketa = mes_data.get_mes("url_anketa")
+years = mes_data.get_list_of_years()
 
 timeout = 60
-
-
-# что хотелось бы ещё:
-# все большие текстовые блоки запихнуть в текстовые файлы и править при необходимости их
 
 
 @bot.message_handler(commands=['start', 'restart'])
@@ -47,18 +45,12 @@ def start_dialog(message):
         users_log.add(str(user.id))
         logging.info(f"НОВЫЙ ПОЛЬЗОВАТЕЛЬ: {user_info}")
         logging.info(f"Всего пользователей: {len(users_log)}")
-        welcome_text = "Архонт приветствует тебя! 🥰\n\nЕсли ты любишь природу, сон в палатке и завтраки на свежем " \
-                       "воздухе — тебе точно к нам! Нам интересно открывать новое, путешествовать в неизведанные " \
-                       "места!\n\nХочешь узнать, где мы уже побывали и, что раскопали? — Задавай вопросы, с радостью " \
-                       "на всё ответим! "
+        welcome_text = mes_data.get_mes("welcome_text")
         # отправка сообщения Дамиру о новом пользователе
         bot.send_message(1275982334, f"Дамир, приффки, сейчас в бота уже зашли пользователей: {len(users_log)}\n"
                                      f"Конкретно сейчас присоединился @{user.username}")
     else:
-        welcome_text = (
-            "Мы студенческий археологический отряд \"Архонт\" 💀 \n"
-            "Можешь выбрать вопрос..."
-        )
+        welcome_text = mes_data.get_mes("welcome_text", "next")
 
     chat_id = message.chat.id
 
@@ -79,15 +71,7 @@ def start_dialog(message):
 def who_we_are(message):
     chat_id = message.chat.id
 
-    # bot.answer_callback_query(chat_id, "Кто мы?")
-    about_us = "Мы первый студенческий археологический отряд в России, " \
-               "а каждое лето проводим в экспедициях, путешествуя по всей стране и даже за границей!\n\n" \
-               "Выезжаем мы обычно в конце июля, а возвращаемся только к началу учёбы. " \
-               "Архонт - это не только про археологию, незабываемое лето, " \
-               "но и про самых близких и верных друзей."
-
-    # bot.send_message(chat_id, about_us)
-
+    about_us = mes_data.get_mes("about_us")
     wait_mes = bot.send_message(chat_id, "Загружаем красивое фото...", parse_mode='Markdown')
 
     try:
@@ -99,7 +83,6 @@ def who_we_are(message):
                          parse_mode='Markdown')
 
     del_mes(chat_id, wait_mes)
-
     back_message(chat_id)
 
 
@@ -121,10 +104,7 @@ def vibe_message(message):
         logging.info(f"Рандомная фотография {random_n} не нашлась")
 
     del_mes(chat_id, wait_mes)
-
-    text = "Каждый отряд имеет свой неповторимый дух. " \
-           "Его ты сможешь ощутить, поехав с нами на сезон, " \
-           "но мы попробуем передать через фотографии, музыку и видео."
+    text = mes_data.get_mes("vibe_message")
 
     markup_inline = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton("фотографии 📸",
@@ -152,7 +132,6 @@ def dig_message(message):
     chat_id = message.chat.id
 
     text = "У Архонта было много экспедиций, можешь узнать про любую из них"
-
     back_message(chat_id, mes=text, komissar=True, other_btn=years)
 
 
@@ -228,10 +207,7 @@ def search_message(message):
 def more_message(message):
     chat_id = message.chat.id
 
-    text = "В отрядах есть такой общительный и весёлый человек - **комиссар**. " \
-           "В Архонте это наш любимый [Дамир](https://vk.com/the.guydie) 😘 \n\n" \
-           "Напишу ему, он обязательно ответит!"
-
+    text = mes_data.get_mes("komissar")
     back_message(chat_id, text)
 
 
@@ -240,11 +216,7 @@ def more_message(message):
 def meeting_message(message):
     chat_id = message.chat.id
 
-    text = "Мы не только в телеграме и вк, а очень ждём именно тебя на нашем первом собрании," \
-           "которое состоится:\n\n" \
-           "📍Когда? 28 октября (вторник)\n📍Во сколько?: 18:30 \n📍Где? НИК, 2.03\n\n" \
-           "Больше подробностей в [группе вк](https://vk.com/sao_arhont)."
-
+    text = mes_data.get_mes("meeting_message")
     back_message(chat_id, text, komissar=True)
 
 
