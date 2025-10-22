@@ -19,7 +19,8 @@ logging.basicConfig(
 
 users_log = load_users()
 
-BOT_TOKEN = ""
+print("Введите токен для бота: ")
+BOT_TOKEN = input().strip()
 bot = telebot.TeleBot(BOT_TOKEN)
 
 mes_data = MessageData("message.json")
