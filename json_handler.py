@@ -2,9 +2,6 @@ import json
 
 from telebot.types import InputMediaPhoto
 
-with open('history.json', encoding='utf-8') as f:
-    templates = json.load(f)
-
 
 class ExpeditionsData:
     def __init__(self, filename):
